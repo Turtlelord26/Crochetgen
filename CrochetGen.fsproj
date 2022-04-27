@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="errors/Errors.fs" />
+    <Compile Include="operators/OperatorBackers.fs" />
+    <Compile Include="operators/Operators.fs" />
+    <Compile Include="types/Pixel.fs" />
+    <Compile Include="types/Stitch.fs" />
+    <Compile Include="Writer.fs" />
+    <Compile Include="Pattern.fs" />
+    <Compile Include="Stitches.fs" />
+    <Compile Include="ImageSimplification.fs" />
+    <Compile Include="ImageInterop.fs" />
+    <Compile Include="InputValidation.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.0" />
+  </ItemGroup>
+</Project>
