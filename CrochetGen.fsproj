@@ -9,6 +9,8 @@
     <Compile Include="operators/Operators.fs" />
     <Compile Include="types/Pixel.fs" />
     <Compile Include="types/Stitch.fs" />
+    <Compile Include="types/Row.fs" />
+    <Compile Include="types/CountedRow.fs" />
     <Compile Include="Writer.fs" />
     <Compile Include="Pattern.fs" />
     <Compile Include="Stitches.fs" />

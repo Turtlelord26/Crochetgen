@@ -1,44 +1,26 @@
 module Crochetgen.Stitches
 
-open Crochetgen.Pixel.Utils
+open Crochetgen.Row
+open Crochetgen.Row.Utils
 open Crochetgen.Stitch
-open Crochetgen.Stitch.Utils
-
-
-
-let extractPixelRow stitchRow =
-    stitchRow |> Seq.map extractPixel
-
-let comparePixelRows row1 row2 =
-    Seq.compareWith (fun pix1 pix2 -> colorDifference pix1 pix2) row1 row2
-
-let comparePixelsToStitches pixelRow stitchRow =
-    stitchRow
-    |> extractPixelRow
-    |> comparePixelRows pixelRow
-
-let pixelsAndStitchesOfSameColors pixelRow stitchRow =
-    match comparePixelsToStitches pixelRow stitchRow with
-    | 0 -> true 
-    | _ -> false
-
-let processPixelRow pixelRow stitchRow stitchRemainder =
-    let colorsMatch =  
-        pixelsAndStitchesOfSameColors pixelRow stitchRow
-    match Seq.head stitchRow with
-    | DoubleStitch _ when colorsMatch -> Seq.map makeTripleStitch pixelRow :: stitchRemainder
-    | SingleStitch _ when colorsMatch -> Seq.map makeDoubleStitch pixelRow :: stitchRemainder
-    | _ -> Seq.map makeSingleStitch pixelRow :: stitchRow :: stitchRemainder
 
 let makeStitches pixelRows =
+
+    let mergeOrAppendRow pixelRow stitchRow stitchRemainder =
+        let colorsMatch =  
+            compareRowColors pixelRow stitchRow.colors = 0
+        match stitchRow.stitch with
+        | DoubleStitch when colorsMatch -> makeTripleStitchRow pixelRow :: stitchRemainder
+        | SingleStitch when colorsMatch -> makeDoubleStitchRow pixelRow :: stitchRemainder
+        | _ -> makeSingleStitchRow pixelRow :: stitchRow :: stitchRemainder
 
     let rec accumulateStitches pixelRows stitchesList =
         match pixelRows, stitchesList with
         | pixelRow :: pixelRemainder, stitchRow :: stitchRemainder -> 
-            processPixelRow pixelRow stitchRow stitchRemainder 
+            mergeOrAppendRow pixelRow stitchRow stitchRemainder 
             |> accumulateStitches pixelRemainder
         | pixelRow :: pixelRemainder, [] ->
-            [Seq.map makeSingleStitch pixelRow] 
+            [makeSingleStitchRow pixelRow] 
             |> accumulateStitches pixelRemainder
         | [], _ -> 
             stitchesList
