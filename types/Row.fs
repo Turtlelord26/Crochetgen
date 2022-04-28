@@ -9,17 +9,23 @@ module Utils =
 
     open Crochetgen.Pixel.Utils
 
+    let makeRow pixels stitchType =
+        { stitch = stitchType; colors = pixels }
+
     let makeChainRow pixels = 
-        { stitch = Chain; colors = pixels }
+        makeRow pixels Chain 
 
     let makeSingleStitchRow pixels = 
-        { stitch = SingleStitch; colors = pixels }
+        makeRow pixels SingleStitch
 
     let makeDoubleStitchRow pixels = 
-        { stitch = DoubleStitch; colors = pixels }
+        makeRow pixels DoubleStitch
 
     let makeTripleStitchRow pixels = 
-        { stitch = TripleStitch; colors = pixels }
+        makeRow pixels TripleStitch
 
     let compareRowColors row1 row2 = 
-        Seq.compareWith colorDifference row1 row2
+        Seq.compareWith colorDifference row1.colors row2.colors
+    
+    let rowColors row =
+        row.colors

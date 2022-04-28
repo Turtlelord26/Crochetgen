@@ -1,21 +1,28 @@
 module Crochetgen.Pattern
 
-open Crochetgen.CountedRow
-open Crochetgen.CountedRow.Utils
+open Crochetgen.CompressedRow
+open Crochetgen.CompressedRow.Utils
 
-let collapseRowCount countedRow =
+let collapseRowCount compressedRow =
 
     let accumulateStitches accumulator colorCount =
-        match accumulator with
-        | prevColorCount :: remainder when prevColorCount.color = colorCount.color -> 
-            incrementColorCount prevColorCount :: remainder
-        | _ -> colorCount :: accumulator
+        let newColorCount = Seq.head colorCount
+        let head = Seq.head accumulator
+        match head with
+        | prevColorCount when prevColorCount.color = newColorCount.color -> 
+            accumulator
+            |> Seq.tail
+            |> Seq.insertAt 0 (incrementColorCount prevColorCount) 
+        | _ -> 
+            accumulator
+            |> Seq.insertAt 0 newColorCount
 
-    let newCounts = 
-        countedRow.colorCounts
-        |> Seq.fold accumulateStitches []
+    let newCounts =
+        compressedRow.colorCounts
+        |> Seq.map (fun row -> Seq.ofList [row])
+        |> Seq.reduce accumulateStitches
     
-    { stitchType = countedRow.stitchType; colorCounts = newCounts }
+    { stitchType = compressedRow.stitchType; colorCounts = newCounts }
 
 let concatWithDelimiter delimiter string1 string2 =
     string1 + delimiter + string2

@@ -1,11 +1,11 @@
-namespace Crochetgen.CountedRow
+namespace Crochetgen.CompressedRow
 
 open Crochetgen.Pixel
 open Crochetgen.Stitch
 
 type ColorCount = { color: Pixel; count: int }
 
-type CountedRow = { stitchType: Stitch; colorCounts: seq<ColorCount> }
+type CompressedRow = { stitchType: Stitch; colorCounts: seq<ColorCount> }
 
 module Utils =
 
