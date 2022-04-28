@@ -36,11 +36,11 @@ let makeRowPattern =
 
 let makePattern stitches =
 
-    let rowLabels = Seq.initInfinite (fun i -> string i)
+    let rowLabels = Seq.initInfinite string
 
-    let patternize =
+    let patternFrom =
         Seq.map makeRowPattern
         >> Seq.map2 prefixConcat rowLabels
         >> Seq.reduce rowConcat
         
-    patternize stitches
+    patternFrom stitches

@@ -2,14 +2,12 @@ module Crochetgen.Main
 
 open Crochetgen.Errors.Fail
 open Crochetgen.InputValidation
+open Crochetgen.Operators
 open Crochetgen.Pattern
 open Crochetgen.Stitches
 open Crochetgen.ImageInterop
 open Crochetgen.ImageSimplification
 open Crochetgen.Writer
-
-//https://docs.sixlabors.com/articles/imagesharp/pixelbuffers.html
-//https://docs.sixlabors.com/api/ImageSharp/SixLabors.ImageSharp.PixelFormats.Rgb24.html
 
 let generatePattern numColors outPath width =
     processImage numColors
@@ -29,11 +27,6 @@ let runIfValid (argv: string[]) =
     let targetHeight = int argv[3]
     let outPath = argv[4]
     run inPath numColors targetWidth targetHeight outPath
-
-let chain option func arg =
-    match option with
-    | None -> func arg
-    | Some errors -> Some errors
 
 [<EntryPoint>]
 let main argv =

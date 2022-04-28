@@ -29,6 +29,12 @@ let makeStitches pixelRows =
     let pixelRowList = List.ofSeq pixelRows
     accumulateStitches pixelRowList []
 
+let prependFoundationRow stitchRows =
+    let foundation = (Seq.head stitchRows).colors |> makeChainRow
+
+    stitchRows
+    |> Seq.insertAt 0 foundation
+
 let getRows rowLength pixelSeq =
     pixelSeq
     |> Seq.chunkBySize rowLength
@@ -37,6 +43,7 @@ let getRows rowLength pixelSeq =
 let pixelsToStitches rowLength =
     getRows rowLength
     >> makeStitches
+    >> prependFoundationRow
 
 let makeStitchesFromPixels rowLength pixels =
     pixelsToStitches rowLength pixels

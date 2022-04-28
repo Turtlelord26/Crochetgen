@@ -6,6 +6,8 @@ open System.IO
 open Crochetgen.Errors
 open Crochetgen.Pixel.Utils
 
+//https://docs.sixlabors.com/articles/imagesharp/index.html
+//https://docs.sixlabors.com/api/ImageSharp/SixLabors.ImageSharp.PixelFormats.Rgb24.html
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Processing
