@@ -55,7 +55,7 @@ let mapToStitches =
 let prependFoundationRow stitchRows =
     let makeFoundation = 
         Seq.head
-        >> rowColors
+        >> getColors
         >> makeChainRow
     
     let foundation =

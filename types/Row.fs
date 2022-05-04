@@ -7,8 +7,6 @@ type Row = { stitch: Stitch; colors: seq<Pixel> }
 
 module Utils =
 
-    open Crochetgen.Pixel.Utils
-
     let makeRow pixels stitchType =
         { stitch = stitchType; colors = pixels }
 
@@ -24,5 +22,8 @@ module Utils =
     let makeTripleStitchRow pixels = 
         makeRow pixels TripleStitch
     
-    let rowColors row =
+    let getStitch row =
+        row.stitch
+    
+    let getColors row =
         row.colors

@@ -4,8 +4,24 @@ open Crochetgen.StringUtils
 open Crochetgen.ImageIO
 open Crochetgen.Pixel.Utils
 open Crochetgen.PixelCount.Utils
+open Crochetgen.Writer
 
 let makeSimplifier numColors =
+
+    let pixcountListToString header =
+        Seq.sortBy getCount
+        >> Seq.map pixelCountToString
+        >> Seq.reduce concatAsNewline
+        >> concatAsNewline header
+    
+    let writeColorSelection palette selections =
+        let colorData =
+            pixcountListToString "Detected colors:" palette
+            |> concatAsList ""
+            |> concatAsList (pixcountListToString "Selected colors:" selections)
+        match writeColors colorData with
+        | None -> ()
+        | Some errors -> errors |> writeErrors
     
     let aggregatePixcountDifference pixel count =
         Seq.map getPixel
@@ -30,28 +46,20 @@ let makeSimplifier numColors =
                     |> Seq.insertAt 0 nextSelection
                 selectNextColor selection colorFrequencies (selectionsLeft - 1)
         
-        let printDebugPixcountList = //This is useful the two list printouts could reasonably write to a file.
-            Seq.sortBy getCount
-            >> Seq.map pixelCountToString
-            >> Seq.reduce concatAsNewline
-            >> printfn "%s"
-
-        printfn "Detected colors:"
-        printDebugPixcountList colorFrequencies
-        
         let firstColor = 
             colorFrequencies
             |> Seq.maxBy getCount
-        let selectedColors = selectNextColor [firstColor] colorFrequencies (numColors - 1)
 
-        printfn "\nSelected colors:"
-        printDebugPixcountList selectedColors
+        let selectedColors = 
+            selectNextColor [firstColor] colorFrequencies (numColors - 1)
+
+        writeColorSelection colorFrequencies selectedColors
 
         selectedColors
 
     let mostCommonColors numColors =
         Seq.countBy (fun pixel -> pixel)
-        >> Seq.map makePixelCount
+        >> Seq.map makePixelCountFromTuple
         >> selectColors numColors
         >> Seq.map getPixel
 
@@ -78,8 +86,11 @@ let processImage numColors width height image: seq<Pixel.Pixel> =
 
     sharpenedImage
     |> savePixels "sharpenedOutputForDebug.png" width height
-    
+
     simplifiedImage
     |> savePixels "simplifiedOutputForDebug.png" width height
+    
+    //I need to collapse the rows here in order to print out the resharpened image
+    //Also would be good to get the color list into a user-named file --- or maybe just the selections into the first line of the pattern file.
 
     simplifiedImage

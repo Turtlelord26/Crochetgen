@@ -12,7 +12,7 @@ let generatePattern numColors outPath width height =
     processImage numColors width height
     >> makeStitchesFromPixels width
     >> makePattern
-    >> writeStitches outPath
+    >> writeOutput outPath
 
 let run inPath numColors targetWidth targetHeight outPath =
     match loadPixelDataFromImageFile targetWidth targetHeight inPath with
@@ -35,5 +35,5 @@ let validateThenRun argv =
 [<EntryPoint>]
 let main argv =
     match validateThenRun argv with
-    | Some errors -> errors |> outputErrors; 1
+    | Some errors -> errors |> writeErrors; 1
     | None -> printfn "Complete!"; 0

@@ -7,7 +7,7 @@ open Crochetgen.Errors
 open Crochetgen.Errors.Fail
 open Crochetgen.Errors.Print
 
-let outputErrors errors =
+let writeErrors errors =
     errors
     |> printErrors
     |> printfn "%s"
@@ -34,7 +34,10 @@ let write (patternText: string) (writer: StreamWriter) =
     | :? NotSupportedException -> WriteNotSupported |> fail
     | :? IOException -> patternText |> WriteIO |> fail
 
-let writeStitches filepath patternText =
+let writeOutput filepath outText =
     match writer filepath with
-    | Ok stream -> write patternText stream
+    | Ok stream -> write outText stream
     | Error e -> e |> fail
+
+let writeColors =
+    writeOutput "data/colors.txt"

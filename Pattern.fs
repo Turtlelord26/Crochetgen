@@ -2,6 +2,8 @@ module Crochetgen.Pattern
 
 open Crochetgen.CompressedRow
 open Crochetgen.CompressedRow.Utils
+open Crochetgen.PixelCount.Utils
+open Crochetgen.SeqUtils
 open Crochetgen.StringUtils
 
 let collapseRowCount compressedRow =
@@ -10,25 +12,46 @@ let collapseRowCount compressedRow =
         let newColorCount = Seq.head colorCount
         let head = Seq.head accumulator
         match head with
-        | prevColorCount when prevColorCount.color = newColorCount.color -> 
+        | prevColorCount when (prevColorCount |> getPixel) = (newColorCount |> getPixel) -> 
             accumulator
             |> Seq.tail
-            |> Seq.insertAt 0 (incrementColorCount prevColorCount) 
+            |> Seq.insertAt 0 (incrementPixelCount prevColorCount) 
         | _ -> 
             accumulator
             |> Seq.insertAt 0 newColorCount
+        
+    let collapse =
+        getPixelCounts
+        >> Seq.map seqify
+        >> Seq.reduce accumulateStitches
+        >> makeCompressedRow compressedRow.stitchType
+
+    collapse compressedRow
+
+let smoothenRowCount compressedRow =
+
+    let combiner cc1 cc2 =
+        let prevPixelCount = cc1 |> Seq.head
+        let nextPixelCount = cc2 |> Seq.head
+        match prevPixelCount |> getCount, nextPixelCount |> getCount with
+        | i, j when i = 1 && j >= 3 -> makePixelCount (nextPixelCount |> getPixel)  (i + j) |> seqify
+        | i, j when i >= 3 && j = 1 -> makePixelCount (prevPixelCount |> getPixel)  (i + j) |> seqify
+        | _, _ -> Seq.append cc2 cc1
 
     let newCounts =
-        compressedRow.colorCounts
-        |> Seq.map (fun row -> Seq.ofList [row])
-        |> Seq.reduce accumulateStitches
+        compressedRow
+        |> getPixelCounts
+        |> Seq.map seqify
+        |> Seq.reduce combiner
     
-    { stitchType = compressedRow.stitchType; colorCounts = newCounts }
+    makeCompressedRow compressedRow.stitchType newCounts
     
 let makeRowPattern =
     compressRow
     >> collapseRowCount
-    >> compressedRowToString concatAsList
+    >> smoothenRowCount
+    >> compressedRowToString
+    >> Seq.reduce concatAsList
 
 let makePattern stitchRows =
 
