@@ -2,6 +2,7 @@ module Crochetgen.Pattern
 
 open Crochetgen.CompressedRow
 open Crochetgen.CompressedRow.Utils
+open Crochetgen.StringUtils
 
 let collapseRowCount compressedRow =
 
@@ -23,31 +24,19 @@ let collapseRowCount compressedRow =
         |> Seq.reduce accumulateStitches
     
     { stitchType = compressedRow.stitchType; colorCounts = newCounts }
-
-let concatWithDelimiter delimiter string1 string2 =
-    string1 + delimiter + string2
-
-let stitchConcat =
-    concatWithDelimiter ", "
-
-let prefixConcat =
-    concatWithDelimiter ".\t"
-
-let rowConcat =
-    concatWithDelimiter "\n"
     
 let makeRowPattern =
-    makeCountedRow
+    compressRow
     >> collapseRowCount
-    >> countedRowToString stitchConcat
+    >> compressedRowToString concatAsList
 
-let makePattern stitches =
+let makePattern stitchRows =
 
     let rowLabels = Seq.initInfinite string
 
     let patternFrom =
         Seq.map makeRowPattern
-        >> Seq.map2 prefixConcat rowLabels
-        >> Seq.reduce rowConcat
+        >> Seq.map2 concatAsPrefix rowLabels
+        >> Seq.reduce concatAsNewline
         
-    patternFrom stitches
+    patternFrom stitchRows

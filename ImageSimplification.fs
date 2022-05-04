@@ -1,34 +1,85 @@
 module Crochetgen.ImageSimplification
 
+open Crochetgen.StringUtils
+open Crochetgen.ImageIO
 open Crochetgen.Pixel.Utils
+open Crochetgen.PixelCount.Utils
 
-let sharpenImage image =
-    image
-    |> Seq.map roundPixel
+let makeSimplifier numColors =
+    
+    let aggregatePixcountDifference pixel count =
+        Seq.map getPixel
+        >> Seq.map (colorDifference (+) pixel)
+        >> Seq.map ((*) count)
+        >> Seq.reduce (*)
 
-let mostCommonColors numColors pixels =
-    pixels
-    |> Seq.countBy (fun pixel -> pixel)
-    |> Seq.sortBy (fun pixcount -> match pixcount with (_, i) -> i)
-    |> Seq.truncate numColors
-    |> Seq.map (fun pixcount -> match pixcount with (pix, _) -> pix)
+    let compareToSelectedColors selectedColors pixcount =
+        aggregatePixcountDifference (getPixel pixcount) (getCount pixcount) selectedColors
 
-let colorDifferenceMagnitude color1 color2 =
-    colorDifference color1 color2
-    |> abs
+    let selectColors numColors colorFrequencies =
 
-let simplify colorSet pixel =
-    colorSet
-    |> Seq.minBy (colorDifferenceMagnitude pixel)
+        let rec selectNextColor selectedColors colorFrequencies count =
+            match count with
+            | 0 -> selectedColors
+            | selectionsLeft -> 
+                let nextSelection =
+                    colorFrequencies
+                    |> Seq.maxBy (compareToSelectedColors selectedColors)
+                let selection =
+                    selectedColors
+                    |> Seq.insertAt 0 nextSelection
+                selectNextColor selection colorFrequencies (selectionsLeft - 1)
+        
+        let printDebugPixcountList = //This is useful the two list printouts could reasonably write to a file.
+            Seq.sortBy getCount
+            >> Seq.map pixelCountToString
+            >> Seq.reduce concatAsNewline
+            >> printfn "%s"
 
-let makeSimplifier numColors image =
-    image
-    |> mostCommonColors numColors
-    |> simplify
+        printfn "Detected colors:"
+        printDebugPixcountList colorFrequencies
+        
+        let firstColor = 
+            colorFrequencies
+            |> Seq.maxBy getCount
+        let selectedColors = selectNextColor [firstColor] colorFrequencies (numColors - 1)
 
-let processImage numColors image: seq<Pixel.Pixel> =
-    let sharpenedImage = sharpenImage image
+        printfn "\nSelected colors:"
+        printDebugPixcountList selectedColors
+
+        selectedColors
+
+    let mostCommonColors numColors =
+        Seq.countBy (fun pixel -> pixel)
+        >> Seq.map makePixelCount
+        >> selectColors numColors
+        >> Seq.map getPixel
+
+    let simplify colorSet pixel =
+        colorSet
+        |> Seq.minBy (colorDifference (+) pixel)
+
+    mostCommonColors numColors
+    >> simplify
+
+let processImage numColors width height image: seq<Pixel.Pixel> =
+    
+    let sharpenedImage = 
+        image
+        |> Seq.map (roundPixel 8)
+    
     let simplifier = 
-        makeSimplifier numColors sharpenedImage
+        sharpenedImage
+        |> makeSimplifier numColors
+    
+    let simplifiedImage =
+        sharpenedImage
+        |> Seq.map simplifier
+
     sharpenedImage
-    |> Seq.map simplifier
+    |> savePixels "sharpenedOutputForDebug.png" width height
+    
+    simplifiedImage
+    |> savePixels "simplifiedOutputForDebug.png" width height
+
+    simplifiedImage

@@ -4,6 +4,8 @@ open System
 open System.IO
 
 open Crochetgen.Errors
+open Crochetgen.Errors.Print
+open Crochetgen.Pixel
 open Crochetgen.Pixel.Utils
 
 //https://docs.sixlabors.com/articles/imagesharp/index.html
@@ -12,25 +14,19 @@ open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Processing
 
-let (>>=) result binder = 
-    Result.bind binder result
+let getPixelArray =
 
-let (>>-) result mapper =
-    Result.map mapper result
+    let getImageSharpPixelArray (image: Image<Rgb24>) =
+        let pixelArray = 
+            Array.create (image.Width * image.Height) (new Rgb24())
+        image.CopyPixelDataTo(pixelArray)
+        pixelArray
 
-let ImageSharpToNativeType (pixelArray: Rgb24[]) =
-    pixelArray
-    |> Seq.map (fun pixel -> makePixel pixel.R pixel.G pixel.B)
+    let toPixel (foreignPixel: Rgb24) =
+        makePixel foreignPixel.R foreignPixel.G foreignPixel.B
 
-let resizeImage (targetWidth: int) (targetHeight: int) (image: Image<Rgb24>) =
-    try
-        let size = new Size(targetWidth, targetHeight)
-        image.Mutate<Rgb24>(fun context -> context.Resize(size, KnownResamplers.NearestNeighbor, false) |> ignore)
-        image |> Ok
-    with
-    | :? ArgumentNullException as e -> e.Message |> InteropNullPointer |> Error
-    | :? ObjectDisposedException as e -> e.Message |> ObjectDisposed |> Error
-    | :? ImageProcessingException as e -> e.Message |> ImageProcessingFailure |> Error
+    getImageSharpPixelArray
+    >> Seq.map toPixel
 
 let loadImage (filename: string) =
     try
@@ -42,25 +38,41 @@ let loadImage (filename: string) =
     | :? NotSupportedException -> filename |> ImageFormatNotSupported |> Error
     | :? FileNotFoundException as e -> e.Message |> FileNotFound |> Error
 
-let extractPixels (image: Image<Rgb24>) =
-    let pixelArray = [|for i in 1..(image.Width * image.Height) -> new Rgb24()|]
-    image.CopyPixelDataTo(pixelArray)
-    pixelArray
-    |> ImageSharpToNativeType
+let resizeImage (targetWidth: int) (targetHeight: int) (image: Image<Rgb24>) =
+    try
+        let size = new Size(targetWidth, targetHeight)
+        image.Mutate<Rgb24>(fun context -> context.Resize(size, KnownResamplers.Spline, false) |> ignore)
+        image.SaveAsPng("resizedOutputForDebug.png")
+        image |> Ok
+    with
+    | :? ArgumentNullException as e -> e.Message |> InteropNullPointer |> Error
+    | :? ObjectDisposedException as e -> e.Message |> ObjectDisposed |> Error
+    | :? ImageProcessingException as e -> e.Message |> ImageProcessingFailure |> Error
 
-let seqIsNotEmpty image =
-    match Seq.isEmpty image with
-    | false -> image |> Ok
-    | true -> EmptyImage |> Error
+let saveImage (filepath: string) (image: Image<Rgb24>) =
+    try
+        image.SaveAsPng(filepath)
+        image |> Ok
+    with
+    | :? ArgumentNullException as e -> e.Message |> InteropNullPointer |> Error
 
-let getPixelsFromFile (filename: string) resizer =
-    filename
-    |> loadImage
-    >>= resizer
-    >>- extractPixels
-    >>= seqIsNotEmpty
+let savePixelsToImage filepath width height pixels =
 
-let loadPixelDataFromImageFile filename targetWidth targetHeight  =
-    resizeImage targetWidth targetHeight
-    |> getPixelsFromFile filename
+    let pixelToIPixel pixel =
+        new Rgb24(pixel.R, pixel.G, pixel.B)
+
+    let loadPixelData (iPixels: Rgb24[]) = 
+        try
+            Image.LoadPixelData(iPixels, width, height) |> Ok
+        with
+        | :? ArgumentException as e -> e.Message |> PixelDimensionsMismatch |> Error
     
+    let saveImage =
+        Seq.map pixelToIPixel
+        >> Array.ofSeq
+        >> loadPixelData
+        >> Result.bind (saveImage filepath)
+    
+    match saveImage pixels with
+    | Ok _ -> ()
+    | Error e -> e |> printError |> printfn "%s"

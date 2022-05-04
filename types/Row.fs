@@ -23,9 +23,6 @@ module Utils =
 
     let makeTripleStitchRow pixels = 
         makeRow pixels TripleStitch
-
-    let compareRowColors row1 row2 = 
-        Seq.compareWith colorDifference row1.colors row2.colors
     
     let rowColors row =
         row.colors

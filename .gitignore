@@ -5,4 +5,5 @@ obj/
 *.nupkg
 *.txt
 *.png
+*.jpg
 .fake

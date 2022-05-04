@@ -5,18 +5,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="errors/Errors.fs" />
-    <Compile Include="operators/OperatorBackers.fs" />
-    <Compile Include="operators/Operators.fs" />
+    <Compile Include="extensions/StringUtils.fs" />
     <Compile Include="types/Pixel.fs" />
+    <Compile Include="types/PixelCount.fs" />
     <Compile Include="types/Stitch.fs" />
     <Compile Include="types/Row.fs" />
     <Compile Include="types/RowCount.fs" />
     <Compile Include="types/CompressedRow.fs" />
+    <Compile Include="ImageInterop.fs" />
     <Compile Include="Writer.fs" />
+    <Compile Include="ImageIO.fs" />
     <Compile Include="Pattern.fs" />
     <Compile Include="Stitches.fs" />
     <Compile Include="ImageSimplification.fs" />
-    <Compile Include="ImageInterop.fs" />
     <Compile Include="InputValidation.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

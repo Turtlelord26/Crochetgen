@@ -4,27 +4,28 @@ open System
 
 open Crochetgen.Errors
 open Crochetgen.Errors.Fail
-open Crochetgen.Operators
-
-let validateNonNegative integer =
-    try 
-        match integer |> int with
-        | i when i > 0 -> None
-        | _ -> integer |> NonpositiveIntegerInput |> fail
-    with
-    | :? FormatException -> integer |> IntegerParsingError |> fail
-    | :? OverflowException -> integer |> IntegerOverflow |> fail
-
-let validateIntArgs numColors targetWidth targetHeight =
-    validateNonNegative targetHeight
-    ++ validateNonNegative targetWidth
-    ++ validateNonNegative numColors
+open Crochetgen.Errors.OptionUtils
 
 let validateNumOfArgs argv =
     match Array.length argv with
     | 5 -> None
     | _ -> MalformedInput |> fail
 
+let validateNonnegativeArgs =
+
+    let validateNonnegative integer =
+        try 
+            match integer |> int with
+            | i when i > 0 -> None
+            | _ -> integer |> NonpositiveIntegerInput |> fail
+        with
+        | :? FormatException -> integer |> IntegerParsingError |> fail
+        | :? OverflowException -> integer |> IntegerOverflow |> fail
+
+    Seq.map validateNonnegative
+    >> Seq.reduce addOptions
+
 let validateInput (argv: string[]) =
-    let chainableValidateIntArgs = validateIntArgs argv[1] argv[2]
-    chain (validateNumOfArgs argv) chainableValidateIntArgs argv[3]
+    match validateNumOfArgs argv with
+    | Some errors -> Some errors
+    | None -> validateNonnegativeArgs [argv[1]; argv[2]; argv[3]]

@@ -13,6 +13,7 @@ type Error =
     | UnauthorizedAccess of filepath: string
     | PathNull
     | PathTooLong
+    | PixelDimensionsMismatch of message: string
     | DirectoryNotFound of filepath: string
     | MalformedPath of filepath: string
     | ObjectDisposed of message: string
@@ -29,6 +30,19 @@ module Fail =
 
     let fail error = 
         { errors=[error] } |> Some
+    
+module OptionUtils =
+
+    let addOptions option1 option2 =
+
+        let addErrors error1 error2 =
+            { errors = List.append error1.errors error2.errors }
+
+        match option1, option2 with
+        | None, None -> None
+        | Some e, None -> Some e
+        | None, Some f -> Some f
+        | Some e, Some f -> addErrors e f |> Some
 
 module Print =
 
@@ -46,6 +60,7 @@ module Print =
         | UnauthorizedAccess filepath -> $"User is not authorized to write to {filepath}, or it is readonly or hidden."
         | PathNull -> "Path was null."
         | PathTooLong -> "The specified path, file name, or both exceed the system-defined maximum length."
+        | PixelDimensionsMismatch message -> message
         | DirectoryNotFound filepath -> $"The specified path is invalid (for example, it is on an unmapped drive).\n{filepath}"
         | MalformedPath filepath -> $"{filepath} is in an invalid format."
         | ObjectDisposed message -> message
