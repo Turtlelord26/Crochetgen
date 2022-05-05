@@ -28,6 +28,9 @@ let collapseRowCount compressedRow =
 
     collapse compressedRow
 
+open Crochetgen.Pixel.Utils
+open Crochetgen.Writer
+open Crochetgen.ImageIO
 let smoothenRowCount compressedRow =
 
     let combiner cc1 cc2 =

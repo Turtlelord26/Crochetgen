@@ -70,6 +70,35 @@ let makeSimplifier numColors =
     mostCommonColors numColors
     >> simplify
 
+open Crochetgen.CompressedRow.Utils
+
+
+let unpackAndSaveRows width height =
+    
+    let unpackAndSaveRow =
+        getPixelCounts
+        >> Seq.map (fun crow -> [for i in 1 .. (crow |> getCount) do (crow |> getPixel)])
+        >> Seq.concat
+    
+    Seq.map unpackAndSaveRow
+    >> Seq.concat
+    >> savePixels "resharpenedOutputForDebug.png" width height
+
+let mapDeadEnd func arg =
+    func arg
+    arg
+
+open Crochetgen.Pattern
+let makeRowPattern =
+    compressRow
+    >> collapseRowCount
+    >> smoothenRowCount
+//Interesting. I don't actually want the stitch information here, only the compressed color counts.
+//Maybe I need to rearrange my data structures. Again.
+//Wouldn't it have been nice to architect this in the first place.
+//Compressed color counts certainly qualifies as image simplification.
+//I will end up not needing rows at all, won't I.
+
 let processImage numColors width height image: seq<Pixel.Pixel> =
     
     let sharpenedImage = 
@@ -90,7 +119,7 @@ let processImage numColors width height image: seq<Pixel.Pixel> =
     simplifiedImage
     |> savePixels "simplifiedOutputForDebug.png" width height
     
-    //I need to collapse the rows here in order to print out the resharpened image
+    //I need to collapse the rows here in order to print out the resharpened image. Collapsing rows asap probably good for performance, see stitches.fs
     //Also would be good to get the color list into a user-named file --- or maybe just the selections into the first line of the pattern file.
 
     simplifiedImage
