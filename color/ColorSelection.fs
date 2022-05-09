@@ -18,7 +18,7 @@ let writeColorSelection palette selections =
         |> concatAsNewline ""
         |> concatAsNewline (pixelCountsToString "Selected colors:" selections)
 
-    match writeColors colorData with
+    match writeOutput "zzzzz.txt" colorData with
     | None -> ()
     | Some errors -> errors |> writeErrors
 

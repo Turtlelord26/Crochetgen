@@ -1,9 +1,9 @@
 module Crochetgen.ColorSimplification
 
 open Crochetgen.ColorSelection
-open Crochetgen.ImageFormatter
 open Crochetgen.Pixel.Utils
 open Crochetgen.PixelCount.Utils
+open Crochetgen.PixelCount.Flatten
 
 let makeSimplifier numColors: seq<Pixel.Pixel> -> Pixel.Pixel -> Pixel.Pixel =
 
