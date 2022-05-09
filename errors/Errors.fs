@@ -48,7 +48,7 @@ module Print =
 
     let printError error =
         match error with
-        | MalformedInput -> "Usage: Crochetgen imageFilename numberOfColors widthInStitches heightInStitches outputFilePath"
+        | MalformedInput -> "Usage: Crochetgen imageFilePath numberOfColors widthInStitches heightInStitches outputFileName"
         | ImageFilenameNull -> "Image filename null."
         | ImageFormatNotRecognized filename -> $"Image format of file {filename} not recognized."
         | ImageContentInvalid filename -> $"Image content of file {filename} invalid."
@@ -60,7 +60,7 @@ module Print =
         | UnauthorizedAccess filepath -> $"User is not authorized to write to {filepath}, or it is readonly or hidden."
         | PathNull -> "Path was null."
         | PathTooLong -> "The specified path, file name, or both exceed the system-defined maximum length."
-        | PixelDimensionsMismatch message -> message
+        | PixelDimensionsMismatch message -> "Length of pixel array did not match given width * height while saving an image\n" + message
         | DirectoryNotFound filepath -> $"The specified path is invalid (for example, it is on an unmapped drive).\n{filepath}"
         | MalformedPath filepath -> $"{filepath} is in an invalid format."
         | ObjectDisposed message -> message

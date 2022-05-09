@@ -1,29 +1,27 @@
 module Crochetgen.Stitches
 
-open Crochetgen.Row.Utils
 open Crochetgen.RowCount.Utils
+open Crochetgen.StitchRow.Utils
 open Crochetgen.Stitch
-
-let unflattenRows rowLength =
-    Seq.chunkBySize rowLength
-    >> Seq.map Seq.ofArray
+open Crochetgen.SeqUtils
 
 let mapToStitches =
 
-    let reducer accumulator boxedRow = 
-        let row = List.head boxedRow
-        let head = List.head accumulator
+    let aggregateRowCounts accumulator boxedRow = 
+        let row = Seq.head boxedRow
+        let head = Seq.head accumulator
         match compareRowCountColors head row with
-        | 0 -> List.insertAt 0 (head |> incrementRowCount) (List.tail accumulator)
-        | _ -> accumulator |> List.insertAt 0 row
+        | 0 -> Seq.insertAt 0 (head |> incrementRowCount) (Seq.tail accumulator)
+        | _ -> accumulator |> Seq.insertAt 0 row
     
     let makeStitchesMatching colors stitchList count =
 
+        let makeStitchRowOfColors colors stitch =
+            makeStitchRow stitch colors
+
         let stitchesFromTypeList stitchList colors =
-            let rowOfColors = 
-                makeRow colors
             stitchList
-            |> Seq.map rowOfColors
+            |> Seq.map (makeStitchRowOfColors colors)
 
         let rec stitchRecurser count stitches =
             match count with
@@ -33,10 +31,12 @@ let mapToStitches =
         stitchRecurser count []
     
     let toStitches rowCount =
+
         let makeColoredStitchesMatching = 
             rowCount
             |> rowCountColors
-            |> makeStitchesMatching 
+            |> makeStitchesMatching
+        
         match rowCount |> rowCountCount with
         | i when i % 2 = 0 -> makeColoredStitchesMatching [DoubleStitch] (i / 2)
         | j when j % 3 = 0 -> makeColoredStitchesMatching [TripleStitch] (j / 3)
@@ -47,29 +47,25 @@ let mapToStitches =
         | o -> makeColoredStitchesMatching [SingleStitch] o
         
     Seq.map makeRowCount
-    >> Seq.map (fun row -> [row])
-    >> Seq.reduce reducer
+    >> Seq.map seqify
+    >> Seq.reduce aggregateRowCounts
     >> Seq.map toStitches
     >> Seq.concat
 
 let prependFoundationRow stitchRows =
+    
     let makeFoundation = 
         Seq.head
-        >> getColors
-        >> makeChainRow
-    
-    let foundation =
-        stitchRows
-        |> makeFoundation
+        >> getPixelCounts
+        >> makeStitchRow Chain
 
     stitchRows
-    |> Seq.insertAt 0 foundation
+    |> Seq.insertAt 0 (stitchRows |> makeFoundation)
 
-let pixelsToStitches rowLength =
-    unflattenRows rowLength
-    >> mapToStitches
+let pixelsToStitches =
+    mapToStitches
     >> prependFoundationRow
 
-let makeStitchesFromPixels rowLength pixels =
+let makeStitchesFromPixels (pixels: seq<seq<PixelCount.PixelCount>>) =
     pixels
-    |> pixelsToStitches rowLength
+    |> pixelsToStitches

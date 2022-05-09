@@ -61,7 +61,7 @@ let savePixelsToImage filepath width height pixels =
     let pixelToIPixel pixel =
         new Rgb24(pixel.R, pixel.G, pixel.B)
 
-    let loadPixelData (iPixels: Rgb24[]) = 
+    let loadPixelData (iPixels: Rgb24[]) =
         try
             Image.LoadPixelData(iPixels, width, height) |> Ok
         with

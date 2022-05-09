@@ -2,6 +2,7 @@ module Crochetgen.ImageIO
 
 open Crochetgen.Errors
 open Crochetgen.ImageInterop
+open Crochetgen.ImageFormatter
 
 let seqIsNotEmpty seq =
     match Seq.isEmpty seq with
@@ -14,5 +15,6 @@ let loadPixelDataFromImageFile targetWidth targetHeight =
     >> Result.map getPixelArray
     >> Result.bind seqIsNotEmpty
 
-let savePixels filename width height image =
-    savePixelsToImage filename width height image
+let savePixels filename width height =
+    decompressAndFlattenImageRows
+    >> savePixelsToImage filename width height

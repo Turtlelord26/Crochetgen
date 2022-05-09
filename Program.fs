@@ -1,31 +1,36 @@
-module Crochetgen.Main
-
 open Crochetgen.Errors.Fail
 open Crochetgen.InputValidation
 open Crochetgen.Pattern
 open Crochetgen.Stitches
 open Crochetgen.ImageIO
-open Crochetgen.ImageSimplification
+open Crochetgen.ColorSimplification
+open Crochetgen.ColorSmoothening
 open Crochetgen.Writer
 
-let generatePattern numColors outPath width height =
-    processImage numColors width height
-    >> makeStitchesFromPixels width
-    >> makePattern
-    >> writeOutput outPath
+let mapDeadEnd func arg =
+    func arg
+    arg
 
-let run inPath numColors targetWidth targetHeight outPath =
-    match loadPixelDataFromImageFile targetWidth targetHeight inPath with
-    | Ok image -> generatePattern numColors outPath targetWidth targetHeight image
+let run numColors width height outName =
+    simplifyColors numColors width
+    >> smoothenColors
+    >> mapDeadEnd (savePixels (outName + ".png") width height)
+    >> makeStitchesFromPixels
+    >> makePattern
+    >> writeOutput (outName + ".txt")
+
+let loadImageAndRun inPath numColors width height outName =
+    match loadPixelDataFromImageFile width height inPath with
+    | Ok image -> run numColors width height outName image
     | Error e -> fail e
 
 let unpackAndRun (argv: string[]) =
     let inPath = argv[0]
     let numColors = int argv[1]
-    let targetWidth = int argv[2]
-    let targetHeight = int argv[3]
-    let outPath = argv[4]
-    run inPath numColors targetWidth targetHeight outPath
+    let width = int argv[2]
+    let height = int argv[3]
+    let outName = argv[4]
+    loadImageAndRun inPath numColors width height outName
 
 let validateThenRun argv =
     match argv |> validateInput with

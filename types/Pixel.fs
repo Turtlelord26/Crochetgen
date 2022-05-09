@@ -14,10 +14,10 @@ module Utils =
           G = g; 
           B = b }
 
-    let colorDifference combiner color1 color2 =
-        color1.R - color2.R |> int |> abs
-        |> combiner (color1.G - color2.G |> int |> abs)
-        |> combiner (color1.B - color2.B |> int |> abs)
+    let pixelDifference color1 color2 =
+        (color1.R - color2.R |> int |> abs)
+        + (color1.G - color2.G |> int |> abs)
+        + (color1.B - color2.B |> int |> abs)
 
     let pixelToString pixel =
         sprintf "%02x%02x%02x" pixel.R pixel.G pixel.B
