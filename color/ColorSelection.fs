@@ -61,3 +61,17 @@ let selectColors numColors colorFrequencies =
 
     selectedColors
     |> Seq.map getPixel
+
+let makeSimplifier numColors: seq<Pixel.Pixel> -> Pixel.Pixel -> Pixel.Pixel =
+
+    let mostCommonColors numColors =
+        Seq.countBy (fun pixel -> pixel)
+        >> Seq.map ((<||) makePixelCount)
+        >> selectColors numColors
+
+    let simplify colorSet pixel =
+        colorSet
+        |> Seq.minBy (pixelDifference pixel)
+
+    mostCommonColors numColors
+    >> simplify

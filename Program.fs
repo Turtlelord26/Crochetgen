@@ -6,6 +6,7 @@ open Crochetgen.Errors.OptionUtils
 open Crochetgen.ImageIO
 open Crochetgen.InputValidation
 open Crochetgen.Pattern
+open Crochetgen.Pixel.Utils
 open Crochetgen.PixelCount.Flatten
 open Crochetgen.Stitches
 open Crochetgen.Writer
@@ -14,13 +15,27 @@ let mapDeadEnd func arg =
     func arg
     arg
 
-let run numColors width height outName =
-    simplifyColors numColors width
-    >> smoothenColors
-    >> mapDeadEnd (savePixels (outName + ".png") width height)
-    >> makeStitchesFromPixels
-    >> makePattern
-    >> writeOutput (outName + ".txt")
+
+
+let run numColors width height outName image =
+
+    let sharpenedPixels = 
+        image
+        |> Seq.map (roundPixel 8)
+        |> Seq.cache
+
+    let simplifier = makeSimplifier numColors sharpenedPixels
+
+    let crochetgen =
+        unflattenAndCompressImageRows width
+        >> simplifyColors simplifier
+        >> smoothenColors
+        >> mapDeadEnd (savePixels (outName + ".png") width height)
+        >> makeStitchesFromPixels
+        >> makePattern
+        >> writeOutput (outName + ".txt")
+    
+    crochetgen sharpenedPixels
 
 let loadImageAndRun inPath numColors width height outName =
     match loadPixelDataFromImageFile width height inPath with

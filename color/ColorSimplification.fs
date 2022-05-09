@@ -5,34 +5,10 @@ open Crochetgen.Pixel.Utils
 open Crochetgen.PixelCount.Utils
 open Crochetgen.Writer
 open Crochetgen.ColorSelection
-open Crochetgen.PixelCount.Flatten
 
-let makeSimplifier numColors: seq<Pixel.Pixel> -> Pixel.Pixel -> Pixel.Pixel =
 
-    let mostCommonColors numColors =
-        Seq.countBy (fun pixel -> pixel)
-        >> Seq.map ((<||) makePixelCount)
-        >> selectColors numColors
 
-    let simplify colorSet pixel =
-        colorSet
-        |> Seq.minBy (pixelDifference pixel)
-
-    mostCommonColors numColors
-    >> simplify
-
-let simplifyColors numColors width flatImageData =
-    
-    let sharpenedPixels = 
-        flatImageData
-        |> Seq.map (roundPixel 8)
-        |> Seq.cache
-    
-    let simplifier = makeSimplifier numColors sharpenedPixels
-
-    let sharpenedPixelCounts =
-        sharpenedPixels
-        |> unflattenAndCompressImageRows width
+let simplifyColors simplifier (sharpenedPixelCounts: seq<seq<PixelCount.PixelCount>>) =
     
     let simplifiedPixelCounts =
         sharpenedPixelCounts
