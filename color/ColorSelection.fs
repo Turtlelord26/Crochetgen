@@ -2,6 +2,7 @@ module Crochetgen.ColorSelection
 
 open Crochetgen.Pixel.Utils
 open Crochetgen.PixelCount.Utils
+open Crochetgen.SeqUtils
 open Crochetgen.StringUtils
 open Crochetgen.Writer
 

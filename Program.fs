@@ -1,10 +1,13 @@
-open Crochetgen.Errors.Fail
-open Crochetgen.InputValidation
-open Crochetgen.Pattern
-open Crochetgen.Stitches
-open Crochetgen.ImageIO
+open Crochetgen.ColorSelection
 open Crochetgen.ColorSimplification
 open Crochetgen.ColorSmoothening
+open Crochetgen.Errors.Fail
+open Crochetgen.Errors.OptionUtils
+open Crochetgen.ImageIO
+open Crochetgen.InputValidation
+open Crochetgen.Pattern
+open Crochetgen.PixelCount.Flatten
+open Crochetgen.Stitches
 open Crochetgen.Writer
 
 let mapDeadEnd func arg =
