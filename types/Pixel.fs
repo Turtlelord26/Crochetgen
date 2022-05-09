@@ -24,13 +24,13 @@ module Utils =
 
     let roundPixel granularity pixel =
 
-        let roundToX x b =
-            let d = double b / x
-            Math.Round(d) * x
+        let roundToGranularity granularity b =
+            let d = double b / granularity
+            Math.Round(d) * granularity
             |> min 255
             |> byte
 
-        let round = roundToX granularity
+        let round = roundToGranularity granularity
 
         makePixel (round pixel.R) 
                   (round pixel.G) 
