@@ -3,7 +3,9 @@ namespace Crochetgen.StitchRow
 open Crochetgen.PixelCount
 open Crochetgen.Stitch
 
-type StitchRow = { stitchType: Stitch; pixelCounts: seq<PixelCount> }
+type StitchRow = 
+    { stitchType: Stitch; 
+      pixelCounts: seq<PixelCount> }
 
 module Utils =
 
@@ -11,14 +13,15 @@ module Utils =
     open Crochetgen.Stitch.Utils
     open Crochetgen.StringUtils
 
+    let makeStitchRow stitchType pixelCounts =
+        { stitchType = stitchType; 
+          pixelCounts = pixelCounts }
+
     let getStitchType compressedRow =
         compressedRow.stitchType
     
     let getPixelCounts compressedRow =
         compressedRow.pixelCounts
-
-    let makeStitchRow stitchType pixelCounts =
-        { stitchType = stitchType; pixelCounts = pixelCounts }
     
     let stitchRowToString stitchRow =
         stitchRow.pixelCounts

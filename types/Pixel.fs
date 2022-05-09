@@ -32,4 +32,6 @@ module Utils =
 
         let round = roundToX granularity
 
-        { R = round pixel.R; G = round pixel.G; B = round pixel.B }
+        makePixel (round pixel.R) 
+                  (round pixel.G) 
+                  (round pixel.B)
