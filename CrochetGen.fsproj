@@ -4,23 +4,22 @@
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="errors/Errors.fs" />
     <Compile Include="extensions/SeqUtils.fs" />
     <Compile Include="extensions/StringUtils.fs" />
+    <Compile Include="errors/Errors.fs" />
     <Compile Include="types/Pixel.fs" />
     <Compile Include="types/PixelCount.fs" />
     <Compile Include="types/Stitch.fs" />
     <Compile Include="types/RowCount.fs" />
     <Compile Include="types/StitchRow.fs" />
-    <Compile Include="ImageInterop.fs" />
-    <Compile Include="ImageFormatter.fs" />
-    <Compile Include="Writer.fs" />
-    <Compile Include="ImageIO.fs" />
-    <Compile Include="Pattern.fs" />
-    <Compile Include="Stitches.fs" />
+    <Compile Include="interop/ImageInterop.fs" />
+    <Compile Include="io/Writer.fs" />
+    <Compile Include="io/ImageIO.fs" />
     <Compile Include="color/ColorSelection.fs" />
     <Compile Include="color/ColorSimplification.fs" />
     <Compile Include="color/ColorSmoothening.fs" />
+    <Compile Include="Pattern.fs" />
+    <Compile Include="Stitches.fs" />
     <Compile Include="InputValidation.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
