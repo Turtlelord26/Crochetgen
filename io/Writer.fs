@@ -38,6 +38,3 @@ let writeOutput filepath outText =
     match writer filepath with
     | Ok stream -> write outText stream
     | Error e -> e |> fail
-
-let writeColors =
-    writeOutput "data/colors.txt"

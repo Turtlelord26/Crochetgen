@@ -36,9 +36,6 @@ module Utils =
     let pixelCountToString pixelCount =
         concatAsLabel (pixelToString pixelCount.pixel) (string pixelCount.count)
     
-    let unwrapPixelCount pixelCount =
-        seq { for i in 1 .. pixelCount.count -> pixelCount.pixel }
-    
     let mergeAdjacentSameColorPixelCounts pixelCounts =
 
         let accumulatePixelCounts pixelCount accumulator  =
@@ -56,3 +53,30 @@ module Utils =
         pixelCounts
         |> Seq.map seqify 
         |> Seq.reduceBack accumulatePixelCounts
+
+module Flatten =
+
+    open Utils
+
+    let unflattenAndCompressImageRows width =
+
+        let accumulateRowPixelCounts =
+            Seq.map makePixelCountAtOne
+            >> mergeAdjacentSameColorPixelCounts
+
+        Seq.chunkBySize width
+        >> Seq.map Seq.ofArray
+        >> Seq.map accumulateRowPixelCounts
+
+    let decompressAndFlattenImageRows image =
+    
+        let unwrapPixelCount pixelCount =
+            seq { for _ in 1 .. pixelCount.count -> pixelCount.pixel }
+        
+        let decompressAndFlattenRow =
+            Seq.map unwrapPixelCount
+            >> Seq.concat
+        
+        image
+        |> Seq.map decompressAndFlattenRow
+        |> Seq.concat

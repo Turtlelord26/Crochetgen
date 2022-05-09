@@ -2,7 +2,7 @@ module Crochetgen.ImageIO
 
 open Crochetgen.Errors
 open Crochetgen.ImageInterop
-open Crochetgen.ImageFormatter
+open Crochetgen.PixelCount.Flatten
 
 let seqIsNotEmpty seq =
     match Seq.isEmpty seq with
