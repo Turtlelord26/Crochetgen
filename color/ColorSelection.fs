@@ -2,61 +2,51 @@ module Crochetgen.ColorSelection
 
 open Crochetgen.Pixel.Utils
 open Crochetgen.PixelCount.Utils
+open Crochetgen.SeqUtils
 open Crochetgen.StringUtils
-open Crochetgen.Writer
 
-let writeColorSelection palette selections =
-
-    let pixelCountsToString header =
-        Seq.sortByDescending getCount
-        >> Seq.map pixelCountToString
-        >> Seq.reduce concatAsNewline
-        >> concatAsNewline header
-
-    let colorData =
-        pixelCountsToString "Detected colors:" palette
-        |> concatAsNewline ""
-        |> concatAsNewline (pixelCountsToString "Selected colors:" selections)
-
-    match writeOutput "zzzzz.txt" colorData with
-    | None -> ()
-    | Some errors -> errors |> writeErrors
+let writeColorSelection selection =
+    selection
+    |> Seq.map pixelToString
+    |> Seq.reduce concatAsNewline
+    |> concatAsNewline "Included colors:"
 
 let differenceFromSelectedColors selectedColors pixcount =
 
-    let weightedDifferenceToSelectedColors candidatePixelCount selectedPixel = 
+    let weightedDifferenceToSelectedColor candidatePixelCount selectedPixel = 
         pixelDifference (candidatePixelCount |> getPixel) selectedPixel
         * (candidatePixelCount |> getCount)
 
-    let aggregatePixcountDifference pixelCount =
+    let differenceFromSelections pixelCount =
         Seq.map getPixel
-        >> Seq.map (weightedDifferenceToSelectedColors pixelCount)
+        >> Seq.map (weightedDifferenceToSelectedColor pixelCount)
         >> Seq.reduce (*)
 
-    aggregatePixcountDifference pixcount selectedColors
+    differenceFromSelections pixcount selectedColors
 
-let selectColors numColors colorFrequencies =
+let selectColors numColors image =
 
-    let rec selectNextColor selectedColors colorFrequencies count =
+    let countColors =
+        Seq.countBy id
+        >> Seq.map ((<||) makePixelCount)
+        >> Seq.cache
+    
+    let colorFrequencies =
+        countColors image
+
+    let rec selectNextColors count selectedColors =
         match count with
         | 0 -> selectedColors
         | selectionsLeft -> 
             let nextSelection =
                 colorFrequencies
                 |> Seq.maxBy (differenceFromSelectedColors selectedColors)
-            let selection =
-                selectedColors
-                |> Seq.insertAt 0 nextSelection
-            selectNextColor selection colorFrequencies (selectionsLeft - 1)
+            selectedColors
+            |> Seq.insertAt 0 nextSelection
+            |> selectNextColors (selectionsLeft - 1)
     
-    let firstColor = 
-        colorFrequencies
-        |> Seq.maxBy getCount
-
-    let selectedColors = 
-        selectNextColor [firstColor] colorFrequencies (numColors - 1)
-
-    writeColorSelection colorFrequencies selectedColors
-
-    selectedColors
+    colorFrequencies
+    |> Seq.maxBy getCount
+    |> seqify
+    |> selectNextColors (numColors - 1)
     |> Seq.map getPixel
