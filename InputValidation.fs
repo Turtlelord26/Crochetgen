@@ -23,7 +23,7 @@ let validateNonnegativeArgs =
         | :? OverflowException -> integer |> IntegerOverflow |> fail
 
     Seq.map validateNonnegative
-    >> Seq.reduce addOptions
+    >> Seq.reduce (++)
 
 let validateInput (argv: string[]) =
     match validateNumOfArgs argv with
