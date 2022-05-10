@@ -32,11 +32,9 @@ let run numColors width height outName image =
         sharpenedPixels
         |> makeColorSet 
 
-    let simplifier = makeSimplifier colorSet
-
     let patternPipeline =
         unflattenAndCompressImageRows width
-        >> simplifyColors simplifier
+        >> simplifyColors colorSet
         >> smoothenColors
         >> mapDeadEnd (savePixels (outName + ".png") width height)
         >> makeStitchesFromPixels

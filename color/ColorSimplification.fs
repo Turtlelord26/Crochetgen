@@ -6,10 +6,19 @@ open Crochetgen.PixelCount.Utils
 open Crochetgen.Writer
 open Crochetgen.ColorSelection
 
+let makeSimplifier colorSet =   
 
-
-let simplifyColors simplifier (sharpenedPixelCounts: seq<seq<PixelCount.PixelCount>>) =
+    let simplify colorSet pixel =
+        colorSet
+        |> Seq.minBy (pixelDifference pixel)
     
+    colorSet
+    |> simplify
+
+let simplifyColors colorSet (sharpenedPixelCounts: seq<seq<PixelCount.PixelCount>>) =
+
+    let simplifier = makeSimplifier colorSet
+
     let simplifiedPixelCounts =
         sharpenedPixelCounts
         |> Seq.map (Seq.map (simplifier |> applyToPixel))
