@@ -21,7 +21,7 @@ let writer filepath =
     | :? ArgumentNullException -> PathNull |> Error
     | :? PathTooLongException -> PathTooLong |> Error
     | :? FileNotFoundException as e -> e.Message |> FileNotFound |> Error
-    | :? DirectoryNotFoundException -> filepath |> DirectoryNotFound |> Error
+    | :? DirectoryNotFoundException as e -> e.Message |> DirectoryNotFound |> Error
     | :? NotSupportedException -> filepath |> MalformedPath |> Error
 
 let write (patternText: string) (writer: StreamWriter) =

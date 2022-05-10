@@ -55,6 +55,7 @@ let saveImage (filepath: string) (image: Image<Rgb24>) =
         image |> Ok
     with
     | :? ArgumentNullException as e -> e.Message |> InteropNullPointer |> Error
+    | :? DirectoryNotFoundException as e -> e.Message |> DirectoryNotFound |> Error
 
 let savePixelsToImage filepath width height pixels =
 

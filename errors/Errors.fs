@@ -1,7 +1,7 @@
 namespace Crochetgen.Errors
 
 type Error =
-    | DirectoryNotFound of filepath: string
+    | DirectoryNotFound of message: string
     | EmptyImage
     | ImageContentInvalid of filename: string
     | ImageFilenameNull
@@ -52,7 +52,7 @@ module Print =
 
     let printError error =
         match error with
-        | DirectoryNotFound filepath -> $"The specified path is invalid (for example, it is on an unmapped drive).\n{filepath}"
+        | DirectoryNotFound message -> message
         | EmptyImage -> "No information loaded from image file, presumed empty."
         | FileNotFound message -> message
         | ImageContentInvalid filename -> $"Image content of file {filename} invalid."
