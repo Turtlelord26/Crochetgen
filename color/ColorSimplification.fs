@@ -2,19 +2,15 @@ module Crochetgen.ColorSimplification
 
 open Crochetgen.Pixel.Utils
 open Crochetgen.PixelCount.Utils
-open Crochetgen.Writer
-open Crochetgen.ColorSelection
 
-let simplifyColors selectedColors: seq<seq<PixelCount.PixelCount>> -> seq<seq<PixelCount.PixelCount>> =
-
-    writeOutput ("simplifier" + "_colors.txt") (selectedColors |> writeColorSelection) |> ignore
+let simplifyColors colorSet =
 
     let simplify pixel =
         selectedColors
         |> Seq.minBy (pixelDifference pixel)
-
-    let simplifyRow =
-        (Seq.map (simplify |> applyToPixel))
-        >> mergeAdjacentSameColorPixelCounts
     
+    let simplifyRow =
+        Seq.map (simplify colorSet |> applyToPixel)
+        >> mergeAdjacentSameColorPixelCounts
+
     Seq.map simplifyRow

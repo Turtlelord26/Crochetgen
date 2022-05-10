@@ -13,6 +13,7 @@
     <Compile Include="types/RowCount.fs" />
     <Compile Include="types/StitchRow.fs" />
     <Compile Include="interop/ImageInterop.fs" />
+    <Compile Include="ImageFormatting.fs" />
     <Compile Include="io/Writer.fs" />
     <Compile Include="io/ImageIO.fs" />
     <Compile Include="color/ColorSelection.fs" />
