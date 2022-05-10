@@ -23,14 +23,10 @@ let run numColors width height outName image =
         |> Seq.map (roundPixel 8)
         |> Seq.cache
     
-    let makeColorSet =
-        Seq.countBy id
-        >> Seq.map ((<||) makePixelCount)
-        >> selectColors numColors
-    
     let colorSet =
         sharpenedPixels
-        |> makeColorSet 
+        |> makeColorSet numColors
+        |> Seq.cache
 
     let patternPipeline =
         unflattenAndCompressImageRows width
@@ -42,6 +38,7 @@ let run numColors width height outName image =
         >> writeOutput (outName + ".txt")
     
     patternPipeline sharpenedPixels
+    ++ (writeOutput (outName + "_colors.txt") (colorSet |> writeColorSelection))
 
 let loadImageAndRun inPath numColors width height outName =
     match loadPixelDataFromImageFile width height inPath with

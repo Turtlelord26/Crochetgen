@@ -6,22 +6,14 @@ open Crochetgen.SeqUtils
 open Crochetgen.StringUtils
 open Crochetgen.Writer
 
-let writeColorSelection palette selections =
+let writeColorSelection selections =
 
     let pixelCountsToString header =
-        Seq.sortByDescending getCount
-        >> Seq.map pixelCountToString
+        Seq.map pixelToString
         >> Seq.reduce concatAsNewline
         >> concatAsNewline header
 
-    let colorData =
-        pixelCountsToString "Detected colors:" palette
-        |> concatAsNewline ""
-        |> concatAsNewline (pixelCountsToString "Selected colors:" selections)
-
-    match writeOutput "zzzzz.txt" colorData with
-    | None -> ()
-    | Some errors -> errors |> writeErrors
+    pixelCountsToString "Selected colors:" selections
 
 let differenceFromSelectedColors selectedColors pixcount =
 
@@ -54,11 +46,10 @@ let selectColors numColors colorFrequencies =
         colorFrequencies
         |> Seq.maxBy getCount
 
-    let selectedColors = 
-        selectNextColor [firstColor] colorFrequencies (numColors - 1)
-
-    writeColorSelection colorFrequencies selectedColors
-
-    selectedColors
+    selectNextColor [firstColor] colorFrequencies (numColors - 1)
     |> Seq.map getPixel
-
+    
+let makeColorSet numColors =
+    Seq.countBy id
+    >> Seq.map ((<||) makePixelCount)
+    >> selectColors numColors
