@@ -8,7 +8,8 @@ Currently generates patterns of single, double, and triple stitches.
 
 When run, will print Complete to the console on success, or error messages.
 
-Usage: `dotnet {.../Crochetgen.dll} {path to input image} {number of colors} {width} {height} {output name}`
+Usage:
+`dotnet {.../Crochetgen.dll} {path to input image} {number of colors} {width} {height} {output name}`
 
 In order, with more details:
 1. The path to Crochetgen.dll. To generate, download the source and run `dotnet build` in its directory.

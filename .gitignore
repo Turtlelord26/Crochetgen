@@ -6,4 +6,5 @@ obj/
 *.txt
 *.png
 *.jpg
+*.bat
 .fake
