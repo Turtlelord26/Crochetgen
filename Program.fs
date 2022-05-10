@@ -15,8 +15,6 @@ let mapDeadEnd func arg =
     func arg
     arg
 
-
-
 let run numColors width height outName image =
 
     let sharpenedPixels = 
@@ -26,7 +24,7 @@ let run numColors width height outName image =
 
     let simplifier = makeSimplifier numColors sharpenedPixels
 
-    let crochetgen =
+    let patternPipeline =
         unflattenAndCompressImageRows width
         >> simplifyColors simplifier
         >> smoothenColors
@@ -35,7 +33,7 @@ let run numColors width height outName image =
         >> makePattern
         >> writeOutput (outName + ".txt")
     
-    crochetgen sharpenedPixels
+    patternPipeline sharpenedPixels
 
 let loadImageAndRun inPath numColors width height outName =
     match loadPixelDataFromImageFile width height inPath with
