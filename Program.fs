@@ -8,6 +8,7 @@ open Crochetgen.InputValidation
 open Crochetgen.Pattern
 open Crochetgen.Pixel.Utils
 open Crochetgen.PixelCount.Flatten
+open Crochetgen.PixelCount.Utils
 open Crochetgen.Stitches
 open Crochetgen.Writer
 
@@ -21,8 +22,17 @@ let run numColors width height outName image =
         image
         |> Seq.map (roundPixel 8)
         |> Seq.cache
+    
+    let makeColorSet =
+        Seq.countBy id
+        >> Seq.map ((<||) makePixelCount)
+        >> selectColors numColors
+    
+    let colorSet =
+        sharpenedPixels
+        |> makeColorSet 
 
-    let simplifier = makeSimplifier numColors sharpenedPixels
+    let simplifier = makeSimplifier colorSet
 
     let patternPipeline =
         unflattenAndCompressImageRows width

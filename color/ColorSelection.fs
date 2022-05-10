@@ -62,17 +62,11 @@ let selectColors numColors colorFrequencies =
     selectedColors
     |> Seq.map getPixel
 
-let makeSimplifier numColors flatImageData =   
+let makeSimplifier colorSet =   
 
     let simplify colorSet pixel =
         colorSet
         |> Seq.minBy (pixelDifference pixel)
     
-    let makeColorSet =
-        Seq.countBy id
-        >> Seq.map ((<||) makePixelCount)
-        >> selectColors numColors
-    
-    flatImageData
-    |> makeColorSet 
+    colorSet
     |> simplify
