@@ -30,6 +30,7 @@ let selectColors numColors =
         differenceFromSelections pixcount selectedColors
     
     let rec selectNextColor count colorFrequencies selectedColors =
+
         match count with
         | 0 -> selectedColors
         | selectionsLeft -> 
