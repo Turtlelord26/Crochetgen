@@ -5,8 +5,8 @@ open Crochetgen.PixelCount.Utils
 
 let simplifyColors colorSet =
 
-    let simplify pixel =
-        selectedColors
+    let simplify colorSet pixel =
+        colorSet
         |> Seq.minBy (pixelDifference pixel)
     
     let simplifyRow =

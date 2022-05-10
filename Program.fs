@@ -7,7 +7,6 @@ open Crochetgen.ImageIO
 open Crochetgen.ImageFormatting
 open Crochetgen.InputValidation
 open Crochetgen.Pattern
-open Crochetgen.PixelCount.Flatten
 open Crochetgen.Stitches
 open Crochetgen.Writer
 
