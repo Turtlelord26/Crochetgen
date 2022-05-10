@@ -4,11 +4,9 @@ open Crochetgen.ColorSmoothening
 open Crochetgen.Errors.Fail
 open Crochetgen.Errors.OptionUtils
 open Crochetgen.ImageIO
+open Crochetgen.ImageFormatting
 open Crochetgen.InputValidation
 open Crochetgen.Pattern
-open Crochetgen.Pixel.Utils
-open Crochetgen.PixelCount.Flatten
-open Crochetgen.PixelCount.Utils
 open Crochetgen.Stitches
 open Crochetgen.Writer
 
@@ -18,15 +16,13 @@ let mapDeadEnd func arg =
 
 let run numColors width height outName image =
 
-    let sharpenedPixels = 
+    let sharpenedImage = 
         image
-        |> Seq.map (roundPixel 8)
-        |> Seq.cache
+        |> sharpenImage
     
-    let colorSet =
-        sharpenedPixels
-        |> makeColorSet numColors
-        |> Seq.cache
+    let colorSet = 
+        sharpenedImage
+        |> selectColors numColors
 
     let patternPipeline =
         unflattenAndCompressImageRows width
@@ -37,12 +33,12 @@ let run numColors width height outName image =
         >> makePattern
         >> writeOutput (outName + ".txt")
     
-    patternPipeline sharpenedPixels
-    ++ (writeOutput (outName + "_colors.txt") (colorSet |> writeColorSelection))
+    patternPipeline sharpenedImage
+    ++ (writeOutput (outName + "_colors.txt") (colorSet |> printFormatColorSelection))
 
 let loadImageAndRun inPath numColors width height outName =
     match loadPixelDataFromImageFile width height inPath with
-    | Ok image -> run numColors width height outName image
+    | Ok image -> image |> run numColors width height outName
     | Error e -> fail e
 
 let unpackAndRun (argv: string[]) =
