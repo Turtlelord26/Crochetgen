@@ -8,6 +8,9 @@ let simplifyColors colorSet =
     let simplify colorSet pixel =
         colorSet
         |> Seq.minBy (pixelDifference pixel)
+    
+    let simplifyRow =
+        Seq.map (simplify colorSet |> applyToPixel)
+        >> mergeAdjacentSameColorPixelCounts
 
-    Seq.map (Seq.map (simplify colorSet |> applyToPixel))
-    >> Seq.map mergeAdjacentSameColorPixelCounts
+    Seq.map simplifyRow

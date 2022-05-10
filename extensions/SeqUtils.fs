@@ -1,4 +1,4 @@
 module Crochetgen.SeqUtils
 
 let seqify element =
-    Seq.ofList [element]
+    seq { yield element }

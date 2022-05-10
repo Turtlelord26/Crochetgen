@@ -18,28 +18,28 @@ let selectColors numColors =
 
     let differenceFromSelectedColors selectedColors pixcount =
 
-        let weightedDifferenceToSelectedColors candidatePixelCount selectedPixel = 
+        let weightedDifferenceToSelectedColor candidatePixelCount selectedPixel = 
             pixelDifference (candidatePixelCount |> getPixel) selectedPixel
             * (candidatePixelCount |> getCount)
 
-        let aggregatePixcountDifference pixelCount =
+        let differenceFromSelections pixelCount =
             Seq.map getPixel
-            >> Seq.map (weightedDifferenceToSelectedColors pixelCount)
+            >> Seq.map (weightedDifferenceToSelectedColor pixelCount)
             >> Seq.reduce (*)
 
-        aggregatePixcountDifference pixcount selectedColors
+        differenceFromSelections pixcount selectedColors
     
-    let rec selectNextColor selectedColors colorFrequencies count =
+    let rec selectNextColor count colorFrequencies selectedColors =
         match count with
         | 0 -> selectedColors
         | selectionsLeft -> 
             let nextSelection =
                 colorFrequencies
                 |> Seq.maxBy (differenceFromSelectedColors selectedColors)
-            let selection =
-                selectedColors
-                |> Seq.insertAt 0 nextSelection
-            selectNextColor selection colorFrequencies (selectionsLeft - 1)
+
+            selectedColors
+            |> Seq.insertAt 0 nextSelection
+            |> selectNextColor (selectionsLeft - 1) colorFrequencies
 
     let makeColorSet numColors colorFrequencies =
         
@@ -47,7 +47,9 @@ let selectColors numColors =
             colorFrequencies
             |> Seq.maxBy getCount
 
-        selectNextColor (firstColor |> seqify) colorFrequencies (numColors - 1)
+        firstColor
+        |> seqify
+        |> selectNextColor (numColors - 1) colorFrequencies 
         |> Seq.map getPixel
 
     Seq.countBy id

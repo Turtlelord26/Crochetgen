@@ -36,7 +36,7 @@ let run numColors width height outName image =
     patternPipeline sharpenedImage
     ++ (writeOutput (outName + "_colors.txt") (colorSet |> printFormatColorSelection))
 
-let loadImageAndRun inPath numColors width height outName =
+let loadImageThenRun inPath numColors width height outName =
     match loadPixelDataFromImageFile width height inPath with
     | Ok image -> image |> run numColors width height outName
     | Error e -> fail e
@@ -47,7 +47,7 @@ let unpackAndRun (argv: string[]) =
     let width = int argv[2]
     let height = int argv[3]
     let outName = argv[4]
-    loadImageAndRun inPath numColors width height outName
+    loadImageThenRun inPath numColors width height outName
 
 let validateThenRun argv =
     match argv |> validateInput with
