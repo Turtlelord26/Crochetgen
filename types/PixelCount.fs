@@ -15,9 +15,6 @@ module Utils =
     let makePixelCount pixel count =
         { pixel = pixel;
           count = count }
-    
-    let makePixelCountAtOne pixel =
-        makePixelCount pixel 1
 
     let getPixel pixelCount = 
         pixelCount.pixel
@@ -36,20 +33,29 @@ module Utils =
     let pixelCountToString pixelCount =
         concatAsLabel (pixelToString pixelCount.pixel) (string pixelCount.count)
     
-    let mergeAdjacentSameColorPixelCounts pixelCounts =
+    let compressPixels pixels =
 
-        let accumulatePixelCounts pixelCount accumulator  =
-            let nextPixelCount = Seq.head pixelCount
-            let prevPixelCount = Seq.head accumulator
-            match 0 = pixelDifference nextPixelCount.pixel prevPixelCount.pixel with
-            | true -> 
-                accumulator
-                |> Seq.tail
-                |> Seq.insertAt 0 (makePixelCount prevPixelCount.pixel (prevPixelCount.count + nextPixelCount.count)) 
-            | false -> 
-                accumulator
-                |> Seq.insertAt 0 nextPixelCount
+        let makePixelCountAtOne pixel =
+            makePixelCount pixel 1
+        
+        let mergeAdjacentSameColorPixelCounts pixelCounts =
 
-        pixelCounts
-        |> Seq.map seqify 
-        |> Seq.reduceBack accumulatePixelCounts
+            let accumulatePixelCounts pixelCount accumulator =
+                let nextPixelCount = Seq.head pixelCount
+                let prevPixelCount = Seq.head accumulator
+                match pixelDifference nextPixelCount.pixel prevPixelCount.pixel with
+                | 0 -> 
+                    accumulator
+                    |> Seq.tail
+                    |> Seq.insertAt 0 (makePixelCount prevPixelCount.pixel (prevPixelCount.count + nextPixelCount.count)) 
+                | _ -> 
+                    accumulator
+                    |> Seq.insertAt 0 nextPixelCount
+
+            pixelCounts
+            |> Seq.map seqify
+            |> Seq.reduceBack accumulatePixelCounts
+        
+        pixels
+        |> Seq.map makePixelCountAtOne
+        |> mergeAdjacentSameColorPixelCounts

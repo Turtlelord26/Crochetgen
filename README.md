@@ -12,7 +12,7 @@ Usage:
 `dotnet {.../Crochetgen.dll} {path to input image} {number of colors} {width} {height} {output name}`
 
 In order, with more details:
-1. The path to Crochetgen.dll. To generate, download the source and run `dotnet build` in its directory.
+1. The path to Crochetgen.dll. To generate, download the source and run `dotnet build` in its directory. May instead use `run` in the project directory.
 2. A filepath to the input image. May be relative, must include file extension (eg .png).
 3. The number of colors to simplify the image to. Nothing goes wrong if this number ends up higher than the number of colors actually in the input.
 4. The output pattern's width in single stitches.

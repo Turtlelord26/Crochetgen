@@ -4,17 +4,17 @@ open Crochetgen.Errors
 open Crochetgen.ImageInterop
 open Crochetgen.ImageFormatting
 
-let seqIsNotEmpty seq =
-    match Seq.isEmpty seq with
-    | false -> seq |> Ok
+let imageIsNotEmpty image =
+    match Array.isEmpty image with
+    | false -> image |> Ok
     | true -> EmptyImage |> Error
 
 let loadPixelDataFromImageFile targetWidth targetHeight =
     loadImage
     >> Result.bind (resizeImage targetWidth targetHeight)
     >> Result.map getPixelArray
-    >> Result.bind seqIsNotEmpty
+    >> Result.bind imageIsNotEmpty
 
 let savePixels filename width height =
-    decompressAndFlattenImageRows
+    flattenImage
     >> savePixelsToImage filename width height

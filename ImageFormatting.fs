@@ -1,33 +1,32 @@
 module Crochetgen.ImageFormatting
 
 open Crochetgen.Pixel.Utils
-open Crochetgen.PixelCount.Utils
 
-let sharpenImage image = 
+let sharpenImage granularity image = 
     image
-    |> Seq.map (roundPixel 8)
-    |> Seq.cache
+    |> Array.map (roundPixel granularity)
 
-let unflattenAndCompressImageRows width =
+let unflattenImage width height =
 
-    let accumulateRowPixelCounts =
-        Seq.map makePixelCountAtOne
-        >> mergeAdjacentSameColorPixelCounts
+    let to2DArray (chunks: array<array<'a>>) =
+        Array2D.init height width (fun i j -> chunks[i][j])
 
-    Seq.chunkBySize width
-    >> Seq.map Seq.ofArray
-    >> Seq.map accumulateRowPixelCounts
+    Array.chunkBySize width
+    >> to2DArray
 
-let decompressAndFlattenImageRows image =
+let unpackRows image=
 
-    let unwrapPixelCount pixelCount =
-        fun _ -> pixelCount |> getPixel
-        |> Seq.init (pixelCount |> getCount)
+    let height =
+        Array2D.length1 image
+
+    let rowSlice i =
+        image[i,*]
     
-    let decompressAndFlattenRow =
-        Seq.map unwrapPixelCount
-        >> Seq.concat
-    
+    rowSlice
+    |> Seq.init height
+
+let flattenImage image =
     image
-    |> Seq.map decompressAndFlattenRow
+    |> unpackRows
     |> Seq.concat
+    |> Array.ofSeq

@@ -18,20 +18,30 @@ let run numColors width height outName image =
 
     let sharpenedImage = 
         image
-        |> sharpenImage
+        |> sharpenImage 8
     
     let colorSet = 
         sharpenedImage
         |> selectColors numColors
+    
+    let smoothenImage =
+        smoothenColors 1 3
+        >> smoothenColors 2 1
+        >> smoothenColors 3 1
+        >> smoothenColors 2 1
+        >> smoothenColors 1 2
+        >> smoothenColors 2 1
+        >> smoothenColors 1 2
 
-    let patternPipeline =
-        unflattenAndCompressImageRows width
-        >> simplifyColors colorSet
-        >> smoothenColors
-        >> mapDeadEnd (savePixels (outName + ".png") width height)
-        >> makeStitchesFromPixels
-        >> makePattern
-        >> writeOutput (outName + ".txt")
+    let patternPipeline sharpenedImage  =
+        sharpenedImage
+        |> unflattenImage width height
+        |> simplifyColors colorSet
+        |> smoothenImage
+        |> mapDeadEnd (savePixels (outName + ".png") width height)
+        |> makeStitchesFromPixels
+        |> makePattern
+        |> writeOutput (outName + ".txt")
     
     patternPipeline sharpenedImage
     ++ (writeOutput (outName + "_colors.txt") (colorSet |> printFormatColorSelection))

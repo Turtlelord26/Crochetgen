@@ -1,35 +1,37 @@
 module Crochetgen.ColorSmoothening
 
-open Crochetgen.PixelCount.Utils
-open Crochetgen.SeqUtils
+let smoothenColors radius passes =
 
-let smoothenRowCount =
+    let threshold = float (2 * radius - 1) ** 2 / 2.0 + 0.5 |> int
 
-    let smoothenCondition count1 count2 =
-        count1 <= 1 && count2 >= 3
-        || count1 <= 2 && count2 >= 7
+    let smoothenConditionOrDefault original pixelCount =
+        match pixelCount |> snd with
+        | i when i >= threshold -> pixelCount |> fst
+        | _ -> original
 
-    let smoothen pixelCount accumulator  =
-        let prevPixelCount = accumulator |> Seq.head
-        let nextPixelCount = pixelCount |> Seq.head
-        match prevPixelCount |> getCount, nextPixelCount |> getCount with
-        | i, j when smoothenCondition i j -> 
-            Seq.insertAt 0 (makePixelCount (nextPixelCount |> getPixel) (i + j)) (Seq.tail accumulator)
-        | i, j when smoothenCondition j i -> 
-            Seq.insertAt 0 (makePixelCount (prevPixelCount |> getPixel) (i + j)) (Seq.tail accumulator)
-        | _, _ -> 
-            Seq.insertAt 0 nextPixelCount accumulator
-
-    Seq.map seqify
-    >> Seq.reduceBack smoothen
-    >> mergeAdjacentSameColorPixelCounts
-
-let smoothenColors imageRows =
-
-    let rec smootheningPasses passes image =
-        match passes with
-        | i when i > 0 -> image |> Seq.map smoothenRowCount |> smootheningPasses (i - 1)
-        | _ -> image
+    let headPixelOrDefault original pixelCounts =
+        match pixelCounts |> Array.length with
+        | 0 -> original
+        | _ ->
+            pixelCounts
+            |> Array.head
+            |> smoothenConditionOrDefault original
     
-    imageRows
-    |> smootheningPasses 2
+    let smoothen pixel =
+        Array.countBy id
+        >> Array.sortByDescending snd
+        >> headPixelOrDefault pixel
+    
+    let smoothenSquare (image: Pixel.Pixel[,]) i1 i2 pixel =
+        let square = image[i1 - radius .. i1 + radius , i2 - radius .. i2 + radius]
+        
+        Array.init (Array2D.length1 square) (fun row -> square[row+(Array2D.base1 square),*])
+        |> Array.concat
+        |> smoothen pixel
+    
+    let smootheningPass image =
+        image
+        |> Array2D.mapi (smoothenSquare image)
+    
+    seq {for _ in 1 .. passes -> smootheningPass}
+    |> Seq.fold (>>) id

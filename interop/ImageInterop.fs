@@ -26,7 +26,7 @@ let getPixelArray =
         makePixel foreignPixel.R foreignPixel.G foreignPixel.B
 
     getImageSharpPixelArray
-    >> Seq.map toPixel
+    >> Array.map toPixel
 
 let loadImage (filename: string) =
     try
@@ -69,8 +69,7 @@ let savePixelsToImage filepath width height pixels =
         | :? ArgumentException as e -> e.Message |> PixelDimensionsMismatch |> Error
     
     let saveImage =
-        Seq.map pixelToIPixel
-        >> Array.ofSeq
+        Array.map pixelToIPixel
         >> loadPixelData
         >> Result.bind (saveImage filepath)
     

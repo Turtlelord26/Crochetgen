@@ -1,11 +1,13 @@
 module Crochetgen.Stitches
 
+open Crochetgen.ImageFormatting
+open Crochetgen.PixelCount.Utils
 open Crochetgen.RowCount.Utils
 open Crochetgen.StitchRow.Utils
 open Crochetgen.Stitch
 open Crochetgen.SeqUtils
 
-let mapToStitches =
+let mapToStitches pixels =
 
     let aggregateRowCounts accumulator boxedRow = 
         let row = Seq.head boxedRow
@@ -45,12 +47,15 @@ let mapToStitches =
         | m when m % 11 = 0 -> makeColoredStitchesMatching [TripleStitch; SingleStitch; TripleStitch; SingleStitch; TripleStitch] (m / 7)
         | n when n % 13 = 0 -> makeColoredStitchesMatching [TripleStitch; DoubleStitch; TripleStitch; DoubleStitch; TripleStitch] (n / 7)
         | o -> makeColoredStitchesMatching [SingleStitch] o
-        
-    Seq.map makeRowCount
-    >> Seq.map seqify
-    >> Seq.reduce aggregateRowCounts
-    >> Seq.map toStitches
-    >> Seq.concat
+
+    let toStitches =    
+        Seq.map makeRowCount
+        >> Seq.map seqify
+        >> Seq.reduce aggregateRowCounts
+        >> Seq.map toStitches
+        >> Seq.concat
+    
+    pixels |> toStitches
 
 let prependFoundationRow stitchRows =
     
@@ -62,10 +67,9 @@ let prependFoundationRow stitchRows =
     stitchRows
     |> Seq.insertAt 0 (stitchRows |> makeFoundation)
 
-let pixelsToStitches =
-    mapToStitches
-    >> prependFoundationRow
-
-let makeStitchesFromPixels (pixels: seq<seq<PixelCount.PixelCount>>) =
+let makeStitchesFromPixels pixels =
     pixels
-    |> pixelsToStitches
+    |> unpackRows
+    |> Seq.map compressPixels
+    |> mapToStitches
+    |> prependFoundationRow
