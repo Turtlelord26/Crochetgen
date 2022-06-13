@@ -10,18 +10,19 @@ let sharpenImage image =
 
 let unflattenAndCompressImageRows width =
 
-        let accumulateRowPixelCounts =
-            Seq.map makePixelCountAtOne
-            >> mergeAdjacentSameColorPixelCounts
+    let accumulateRowPixelCounts =
+        Seq.map makePixelCountAtOne
+        >> mergeAdjacentSameColorPixelCounts
 
-        Seq.chunkBySize width
-        >> Seq.map Seq.ofArray
-        >> Seq.map accumulateRowPixelCounts
+    Seq.chunkBySize width
+    >> Seq.map Seq.ofArray
+    >> Seq.map accumulateRowPixelCounts
 
 let decompressAndFlattenImageRows image =
 
     let unwrapPixelCount pixelCount =
-        seq { for _ in 1 .. pixelCount |> getCount -> pixelCount |> getPixel }
+        fun _ -> pixelCount |> getPixel
+        |> Seq.init (pixelCount |> getCount)
     
     let decompressAndFlattenRow =
         Seq.map unwrapPixelCount
