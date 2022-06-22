@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="RailwayUtilities.fs" />
     <Compile Include="extensions/SeqUtils.fs" />
     <Compile Include="extensions/StringUtils.fs" />
     <Compile Include="errors/Errors.fs" />

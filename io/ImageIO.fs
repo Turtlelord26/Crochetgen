@@ -9,12 +9,16 @@ let imageIsNotEmpty image =
     | false -> image |> Ok
     | true -> EmptyImage |> Error
 
-let loadPixelDataFromImageFile targetWidth targetHeight =
-    loadImage
-    >> Result.bind (resizeImage targetWidth targetHeight)
+let imageToPixels targetWidth targetHeight =
+    resizeImage targetWidth targetHeight
     >> Result.map getPixelArray
     >> Result.bind imageIsNotEmpty
 
-let savePixels filename width height =
+let loadImage = loadImage
+
+let savePixels filename format width height =
     flattenImage
-    >> savePixelsToImage filename width height
+    >> savePixelsToImage filename format width height
+
+let makeOutFilename name format =
+    appendExtension name format
