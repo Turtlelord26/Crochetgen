@@ -46,19 +46,19 @@ let saveImage (filepath: string) (format: IImageFormat) (image: Image) =
     try
         let stream = new FileStream(filepath, FileMode.Create)
         image.Save(stream, format)
-        None
+        Ok ()
     with
-    | :? ArgumentNullException as e -> e.Message |> InteropNullPointer |> Some
-    | :? DirectoryNotFoundException as e -> e.Message |> DirectoryNotFound |> Some
+    | :? ArgumentNullException as e -> e.Message |> InteropNullPointer |> Error
+    | :? DirectoryNotFoundException as e -> e.Message |> DirectoryNotFound |> Error
 
 let mutate mutator (image: Image) =
     try
         image.Mutate(mutator)
-        None
+        Ok ()
     with
-    | :? ArgumentNullException as e -> e.Message |> InteropNullPointer |> Some
-    | :? ObjectDisposedException as e -> e.Message |> ObjectDisposed |> Some
-    | :? ImageProcessingException as e -> e.Message |> ImageProcessingFailure |> Some
+    | :? ArgumentNullException as e -> e.Message |> InteropNullPointer |> Error
+    | :? ObjectDisposedException as e -> e.Message |> ObjectDisposed |> Error
+    | :? ImageProcessingException as e -> e.Message |> ImageProcessingFailure |> Error
 
 let resizeImage (targetWidth: int) (targetHeight: int) (image: Image<Rgb24>) =
     let size = new Size(targetWidth, targetHeight)

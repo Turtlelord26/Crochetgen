@@ -6,5 +6,5 @@ let tee func arg =
 
 let errorableTee func arg =
     match func arg with
-    | Some error -> Error error
-    | None -> Ok arg
+    | Ok () -> Ok arg
+    | Error error -> Error error

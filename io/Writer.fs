@@ -4,7 +4,6 @@ open System
 open System.IO
 
 open Crochetgen.Errors
-open Crochetgen.Errors.Fail
 open Crochetgen.Errors.Print
 
 let writeErrors errors =
@@ -28,13 +27,12 @@ let write (patternText: string) (writer: StreamWriter) =
     try
         writer.Write(patternText)
         writer.Close()
-        None
+        Ok ()
     with
-    | :? ObjectDisposedException as e -> e.Message |> ObjectDisposed |> fail
-    | :? NotSupportedException -> WriteNotSupported |> fail
-    | :? IOException -> patternText |> WriteIO |> fail
+    | :? ObjectDisposedException as e -> e.Message |> ObjectDisposed |> Error
+    | :? NotSupportedException -> WriteNotSupported |> Error
+    | :? IOException -> patternText |> WriteIO |> Error
 
 let writeOutput filepath outText =
-    match writer filepath with
-    | Ok stream -> write outText stream
-    | Error e -> e |> fail
+    writer filepath
+    |> Result.bind (write outText)
