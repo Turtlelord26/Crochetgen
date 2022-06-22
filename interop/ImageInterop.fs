@@ -38,24 +38,28 @@ let loadImage (filename: string) =
     | :? NotSupportedException -> filename |> ImageFormatNotSupported |> Error
     | :? FileNotFoundException as e -> e.Message |> FileNotFound |> Error
 
-let resizeImage (targetWidth: int) (targetHeight: int) (image: Image<Rgb24>) =
-    try
-        let size = new Size(targetWidth, targetHeight)
-        image.Mutate<Rgb24>(fun context -> context.Resize(size, KnownResamplers.Spline, false) |> ignore)
-        image.SaveAsPng("resizedOutputForDebug.png")
-        image |> Ok
-    with
-    | :? ArgumentNullException as e -> e.Message |> InteropNullPointer |> Error
-    | :? ObjectDisposedException as e -> e.Message |> ObjectDisposed |> Error
-    | :? ImageProcessingException as e -> e.Message |> ImageProcessingFailure |> Error
-
-let saveImage (filepath: string) (image: Image<Rgb24>) =
+let saveImage (filepath: string) (image: Image) =
     try
         image.SaveAsPng(filepath)
         image |> Ok
     with
     | :? ArgumentNullException as e -> e.Message |> InteropNullPointer |> Error
     | :? DirectoryNotFoundException as e -> e.Message |> DirectoryNotFound |> Error
+
+let mutate mutator (image: Image) =
+    try
+        image.Mutate(mutator)
+        image |> Ok
+    with
+    | :? ArgumentNullException as e -> e.Message |> InteropNullPointer |> Error
+    | :? ObjectDisposedException as e -> e.Message |> ObjectDisposed |> Error
+    | :? ImageProcessingException as e -> e.Message |> ImageProcessingFailure |> Error
+
+let resizeImage (targetWidth: int) (targetHeight: int) (image: Image) =
+    let size = new Size(targetWidth, targetHeight)
+    let resizer = fun (context: IImageProcessingContext) -> context.Resize(size, KnownResamplers.Spline, false) |> ignore
+    mutate resizer image
+    |> Result.bind (saveImage "resizedOutputForDebug.png")
 
 let savePixelsToImage filepath width height pixels =
 
